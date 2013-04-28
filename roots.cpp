@@ -26,7 +26,9 @@
 #include "mtdutils/mounts.h"
 #include "roots.h"
 #include "common.h"
+#ifdef USE_EXT4
 #include "make_ext4fs.h"
+#endif
 
 static int num_volumes = 0;
 static Volume* device_volumes = NULL;
@@ -270,6 +272,7 @@ int format_volume(const char* volume) {
         return 0;
     }
 
+#ifdef USE_EXT4
     if (strcmp(v->fs_type, "ext4") == 0) {
         int result = make_ext4fs(v->device, v->length, volume, sehandle);
         if (result != 0) {
@@ -278,6 +281,7 @@ int format_volume(const char* volume) {
         }
         return 0;
     }
+#endif
 
     LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
     return -1;
