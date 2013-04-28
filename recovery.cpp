@@ -28,11 +28,12 @@
 #include <time.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <bsd/string.h>
+#include <sys/reboot.h>
+#include <linux/reboot.h>
 
 #include "bootloader.h"
 #include "common.h"
-#include "cutils/properties.h"
-#include "cutils/android_reboot.h"
 #include "install.h"
 #include "minui/minui.h"
 #include "minzip/DirUtil.h"
@@ -779,11 +780,6 @@ prompt_and_wait(Device* device, int status) {
 }
 
 static void
-print_property(const char *key, const char *name, void *cookie) {
-    printf("%s=%s\n", key, name);
-}
-
-static void
 load_locale_from_cache() {
     FILE* fp = fopen_path(LOCALE_FILE, "r");
     char buffer[80];
@@ -898,9 +894,6 @@ main(int argc, char **argv) {
     }
     printf("\n");
 
-    property_list(print_property, NULL);
-    printf("\n");
-
     int status = INSTALL_SUCCESS;
 
     if (update_package != NULL) {
@@ -934,6 +927,6 @@ main(int argc, char **argv) {
     // Otherwise, get ready to boot the main system...
     finish_recovery(send_intent);
     ui->Print("Rebooting...\n");
-    android_reboot(ANDROID_RB_RESTART, 0, 0);
+    reboot(LINUX_REBOOT_CMD_RESTART);
     return EXIT_SUCCESS;
 }
