@@ -26,7 +26,6 @@
 #include <fcntl.h>
 
 #include "ui.h"
-#include "cutils/properties.h"
 #include "install.h"
 #include "common.h"
 #include "adb_install.h"
@@ -53,20 +52,14 @@ set_usb_driver(bool enabled) {
 
 static void
 stop_adbd() {
-    property_set("ctl.stop", "adbd");
     set_usb_driver(false);
 }
 
 
 static void
 maybe_restart_adbd() {
-    char value[PROPERTY_VALUE_MAX+1];
-    int len = property_get("ro.debuggable", value, NULL);
-    if (len == 1 && value[0] == '1') {
-        ui->Print("Restarting adbd...\n");
-        set_usb_driver(true);
-        property_set("ctl.start", "adbd");
-    }
+    ui->Print("Restarting adbd...\n");
+    set_usb_driver(true);
 }
 
 int
