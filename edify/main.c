@@ -19,7 +19,6 @@
 #include <string.h>
 
 #include "expr.h"
-#include "parser.h"
 
 extern int yyparse(Expr** root, int* error_count);
 
