@@ -28,8 +28,6 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "cutils/misc.h"
-#include "cutils/properties.h"
 #include "edify/expr.h"
 #include "mincrypt/sha.h"
 #include "minzip/DirUtil.h"
@@ -601,121 +599,6 @@ done:
 }
 
 
-Value* GetPropFn(const char* name, State* state, int argc, Expr* argv[]) {
-    if (argc != 1) {
-        return ErrorAbort(state, "%s() expects 1 arg, got %d", name, argc);
-    }
-    char* key;
-    key = Evaluate(state, argv[0]);
-    if (key == NULL) return NULL;
-
-    char value[PROPERTY_VALUE_MAX];
-    property_get(key, value, "");
-    free(key);
-
-    return StringValue(strdup(value));
-}
-
-
-// file_getprop(file, key)
-//
-//   interprets 'file' as a getprop-style file (key=value pairs, one
-//   per line, # comment lines and blank lines okay), and returns the value
-//   for 'key' (or "" if it isn't defined).
-Value* FileGetPropFn(const char* name, State* state, int argc, Expr* argv[]) {
-    char* result = NULL;
-    char* buffer = NULL;
-    char* filename;
-    char* key;
-    if (ReadArgs(state, argv, 2, &filename, &key) < 0) {
-        return NULL;
-    }
-
-    struct stat st;
-    if (stat(filename, &st) < 0) {
-        ErrorAbort(state, "%s: failed to stat \"%s\": %s",
-                   name, filename, strerror(errno));
-        goto done;
-    }
-
-#define MAX_FILE_GETPROP_SIZE    65536
-
-    if (st.st_size > MAX_FILE_GETPROP_SIZE) {
-        ErrorAbort(state, "%s too large for %s (max %d)",
-                   filename, name, MAX_FILE_GETPROP_SIZE);
-        goto done;
-    }
-
-    buffer = malloc(st.st_size+1);
-    if (buffer == NULL) {
-        ErrorAbort(state, "%s: failed to alloc %lld bytes", name, st.st_size+1);
-        goto done;
-    }
-
-    FILE* f = fopen(filename, "rb");
-    if (f == NULL) {
-        ErrorAbort(state, "%s: failed to open %s: %s",
-                   name, filename, strerror(errno));
-        goto done;
-    }
-
-    if (fread(buffer, 1, st.st_size, f) != st.st_size) {
-        ErrorAbort(state, "%s: failed to read %lld bytes from %s",
-                   name, st.st_size+1, filename);
-        fclose(f);
-        goto done;
-    }
-    buffer[st.st_size] = '\0';
-
-    fclose(f);
-
-    char* line = strtok(buffer, "\n");
-    do {
-        // skip whitespace at start of line
-        while (*line && isspace(*line)) ++line;
-
-        // comment or blank line: skip to next line
-        if (*line == '\0' || *line == '#') continue;
-
-        char* equal = strchr(line, '=');
-        if (equal == NULL) {
-            ErrorAbort(state, "%s: malformed line \"%s\": %s not a prop file?",
-                       name, line, filename);
-            goto done;
-        }
-
-        // trim whitespace between key and '='
-        char* key_end = equal-1;
-        while (key_end > line && isspace(*key_end)) --key_end;
-        key_end[1] = '\0';
-
-        // not the key we're looking for
-        if (strcmp(key, line) != 0) continue;
-
-        // skip whitespace after the '=' to the start of the value
-        char* val_start = equal+1;
-        while(*val_start && isspace(*val_start)) ++val_start;
-
-        // trim trailing whitespace
-        char* val_end = val_start + strlen(val_start)-1;
-        while (val_end > val_start && isspace(*val_end)) --val_end;
-        val_end[1] = '\0';
-
-        result = strdup(val_start);
-        break;
-
-    } while ((line = strtok(NULL, "\n")));
-
-    if (result == NULL) result = strdup("");
-
-  done:
-    free(filename);
-    free(key);
-    free(buffer);
-    return StringValue(result);
-}
-
-
 static bool write_raw_image_cb(const unsigned char* data,
                                int data_len, void* ctx) {
     int r = mtd_write_data((MtdWriteContext*)ctx, (const char *)data, data_len);
@@ -1136,8 +1019,6 @@ void RegisterInstallFunctions() {
     RegisterFunction("set_perm", SetPermFn);
     RegisterFunction("set_perm_recursive", SetPermFn);
 
-    RegisterFunction("getprop", GetPropFn);
-    RegisterFunction("file_getprop", FileGetPropFn);
     RegisterFunction("write_raw_image", WriteRawImageFn);
 
     RegisterFunction("apply_patch", ApplyPatchFn);
