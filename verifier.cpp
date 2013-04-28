@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+#include <malloc.h>
 
 extern RecoveryUI* ui;
 
