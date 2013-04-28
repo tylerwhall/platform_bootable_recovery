@@ -1,8 +1,8 @@
-lib_LTLIBRARIES =
+noinst_LTLIBRARIES =
 bin_PROGRAMS =
 CLEANFILES =
 
-lib_LTLIBRARIES += libapplypatch.la
+noinst_LTLIBRARIES += libapplypatch.la
 libapplypatch_la_CFLAGS = $(MINCRYPT_CFLAGS)
 libapplypatch_la_LDFLAGS = $(MINCRYPT_LIBS)
 libapplypatch_la_SOURCES = \
@@ -16,7 +16,7 @@ libapplypatch_la_SOURCES = \
 
 BUILT_SOURCES = edify/parser.h
 AM_YFLAGS = -d
-lib_LTLIBRARIES += libedify.la
+noinst_LTLIBRARIES += libedify.la
 libedify_la_SOURCES = \
 	edify/expr.c \
 	edify/parser.y \
@@ -26,12 +26,12 @@ CLEANFILES += \
 	edify/parser.h \
 	edify/lexer.c
 
-lib_LTLIBRARIES += libminelf.la
+noinst_LTLIBRARIES += libminelf.la
 libminelf_la_SOURCES = minelf/Retouch.c
 libminelf_la_CFLAGS = $(MINCRYPT_CFLAGS)
 libminelf_la_LDFLAGS = $(MINCRYPT_LIBS)
 
-lib_LTLIBRARIES += libminzip.la
+noinst_LTLIBRARIES += libminzip.la
 libminzip_la_CFLAGS = $(SAFE_IOP_CFLAGS) -D_GNU_SOURCE
 libminzip_la_LDFLAGS = $(SAFE_IOP_LIBS)
 libminzip_la_SOURCES = \
@@ -41,7 +41,7 @@ libminzip_la_SOURCES = \
 	minzip/SysUtil.c \
 	minzip/Zip.c
 
-lib_LTLIBRARIES += libmtdutils.la
+noinst_LTLIBRARIES += libmtdutils.la
 libmtdutils_la_SOURCES = \
 	mtdutils/mtdutils.c \
 	mtdutils/mounts.c
