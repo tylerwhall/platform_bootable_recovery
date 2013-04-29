@@ -55,6 +55,8 @@ updater_updater_LDADD = \
 	libedify.la \
 	libminelf.la \
 	libminzip.la \
-	libmtdutils.la
+	libmtdutils.la \
+	-lz \
+	-lbz2
 updater_updater_CFLAGS = $(MINCRYPT_CFLAGS)
-updater_updater_LDFLAGS = $(MINCRYPT_LIBS) -lz -lbz2
+updater_updater_LDFLAGS = $(MINCRYPT_LIBS) -all-static
