@@ -57,4 +57,4 @@ updater_updater_LDADD = \
 	libminzip.la \
 	libmtdutils.la
 updater_updater_CFLAGS = $(MINCRYPT_CFLAGS)
-updater_updater_LDFLAGS = $(MINCRYPT_LIBS) -lz -lbz2 -lselinux
+updater_updater_LDFLAGS = $(MINCRYPT_LIBS) -lz -lbz2
